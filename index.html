@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="pt-BR">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=1920, height=1080, initial-scale=1.0"
+		/>
+		<title>Joninha's Play Pro</title>
+		<style>
+			:root {
+				--bg-dark: #090b10;
+				--panel-bg: rgba(18, 22, 33, 0.95);
+				--card-bg: #151a26;
+				--card-bg-hover: #22293a;
+				--accent: #00d2ff;
+				--accent-gradient: linear-gradient(135deg, #0072ff 0%, #00d2ff 100%);
+				--text-main: #f0f3f8;
+				--text-muted: #7e8b9b;
+				--border-color: rgba(255, 255, 255, 0.08);
+				--focus-glow: 0 0 20px rgba(0, 210, 255, 0.5);
+			}
+
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+				user-select: none;
+				-webkit-user-select: none;
+			}
+
+			body {
+				font-family:
+					-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+					Arial, sans-serif;
+				background-color: var(--bg-dark);
+				color: var(--text-main);
+				overflow: hidden;
+				width: 1920px;
+				height: 1080px;
+			}
+
+			::-webkit-scrollbar {
+				width: 6px;
+				height: 6px;
+			}
+			::-webkit-scrollbar-track {
+				background: rgba(0, 0, 0, 0.2);
+			}
+			::-webkit-scrollbar-thumb {
+				background: rgba(255, 255, 255, 0.15);
+				border-radius: 3px;
+			}
+
+			.screen {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 1920px;
+				height: 1080px;
+				display: none;
+			}
+
+			.screen.active {
+				display: block;
+			}
+
+			.focusable {
+				outline: none !important;
+			}
+
+			svg.icon {
+				width: 26px;
+				height: 26px;
+				vertical-align: middle;
+				fill: none;
+				stroke: currentColor;
+				stroke-width: 2;
+				stroke-linecap: round;
+				stroke-linejoin: round;
+			}
+
+			/* Loader */
+			.loader-overlay {
+				display: none;
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 1920px;
+				height: 1080px;
+				background: rgba(9, 11, 16, 0.85);
+				z-index: 99999;
+				text-align: center;
+			}
+
+			.spinner {
+				width: 70px;
+				height: 70px;
+				border: 5px solid rgba(255, 255, 255, 0.1);
+				border-top: 5px solid var(--accent);
+				border-radius: 50%;
+				margin: 500px auto 0 auto;
+				animation: spin 0.8s linear infinite;
+			}
+
+			@keyframes spin {
+				0% {
+					transform: rotate(0deg);
+				}
+				100% {
+					transform: rotate(360deg);
+				}
+			}
+
+			/* Splash & Login */
+			#splash-screen {
+				background: radial-gradient(circle at center, #182032 0%, #090b10 100%);
+				z-index: 20000;
+				text-align: center;
+			}
+
+			#login-screen {
+				background: radial-gradient(
+					ellipse at bottom,
+					#151d30 0%,
+					#090b10 100%
+				);
+			}
+
+			.login-card {
+				background: var(--panel-bg);
+				border: 1px solid var(--border-color);
+				padding: 60px;
+				border-radius: 24px;
+				width: 640px;
+				margin: 250px auto 0 auto;
+				box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
+			}
+
+			.login-header {
+				text-align: center;
+				margin-bottom: 40px;
+			}
+
+			.login-header img {
+				width: 50%;
+				margin-bottom: 15px;
+			}
+
+			.form-group {
+				margin-bottom: 24px;
+			}
+
+			.form-group input {
+				width: 100%;
+				padding: 18px 20px;
+				background: rgba(0, 0, 0, 0.35);
+				border: 2px solid var(--border-color);
+				border-radius: 12px;
+				color: #fff;
+				font-size: 1.2rem;
+			}
+
+			.form-group input:focus {
+				border-color: var(--accent);
+				box-shadow: var(--focus-glow);
+				background: rgba(0, 0, 0, 0.6);
+			}
+
+			.btn-primary {
+				width: 100%;
+				padding: 20px;
+				background: var(--accent-gradient);
+				border: none;
+				border-radius: 12px;
+				color: #fff;
+				font-size: 1.2rem;
+				font-weight: 700;
+				cursor: pointer;
+			}
+
+			.btn-primary:focus {
+				box-shadow: var(--focus-glow);
+				border: 2px solid #fff;
+			}
+
+			/* TOPBAR */
+			#main-screen {
+				width: 1920px;
+				height: 1080px;
+			}
+
+			.topbar {
+				height: 90px;
+				width: 1920px;
+				background: var(--panel-bg);
+				border-bottom: 1px solid var(--border-color);
+				padding: 18px 40px;
+			}
+
+			.app-brand-horizontal {
+				float: left;
+				margin-right: 40px;
+			}
+
+			.app-brand-horizontal img {
+				height: 50px;
+				width: auto;
+			}
+
+			.nav-tabs-horizontal {
+				float: left;
+			}
+
+			.nav-btn {
+				display: inline-block;
+				padding: 12px 24px;
+				background: transparent;
+				border: 2px solid transparent;
+				border-radius: 12px;
+				color: var(--text-muted);
+				font-size: 1.1rem;
+				font-weight: 600;
+				margin-right: 12px;
+				cursor: pointer;
+			}
+
+			.nav-btn svg {
+				margin-right: 10px;
+			}
+
+			.nav-btn.active-tab {
+				color: #fff;
+				background: rgba(255, 255, 255, 0.08);
+			}
+
+			.nav-btn:focus {
+				border-color: var(--accent);
+				background: var(--card-bg-hover);
+				color: #fff;
+				box-shadow: var(--focus-glow);
+			}
+
+			.topbar-search {
+				float: right;
+				width: 380px;
+			}
+
+			.topbar-search input {
+				width: 100%;
+				padding: 12px 20px;
+				background: rgba(0, 0, 0, 0.4);
+				border: 2px solid var(--border-color);
+				border-radius: 10px;
+				color: #fff;
+				font-size: 1rem;
+			}
+
+			.topbar-search input:focus {
+				border-color: var(--accent);
+				background: rgba(0, 0, 0, 0.7);
+			}
+
+			/* WORKSPACE */
+			.workspace {
+				width: 1920px;
+				height: 990px;
+				position: relative;
+			}
+
+			.category-panel {
+				float: left;
+				width: 320px;
+				height: 990px;
+				background: rgba(12, 15, 23, 0.95);
+				border-right: 1px solid var(--border-color);
+				padding: 24px 12px 0 20px;
+			}
+
+			.category-panel h3 {
+				font-size: 0.85rem;
+				font-weight: 700;
+				text-transform: uppercase;
+				letter-spacing: 2px;
+				color: var(--text-muted);
+				margin-bottom: 12px;
+			}
+
+			.category-list {
+				height: 920px;
+				overflow-y: scroll;
+				padding-right: 6px;
+			}
+
+			.cat-item {
+				display: block;
+				width: 100%;
+				padding: 12px 14px;
+				background: transparent;
+				border: 2px solid transparent;
+				border-radius: 10px;
+				color: var(--text-muted);
+				font-size: 1rem;
+				margin-bottom: 6px;
+				text-align: left;
+				cursor: pointer;
+			}
+
+			.cat-item .cat-title {
+				display: inline-block;
+				width: 190px;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			.cat-item .cat-badge {
+				float: right;
+				font-size: 0.8rem;
+				background: rgba(255, 255, 255, 0.08);
+				padding: 3px 8px;
+				border-radius: 12px;
+			}
+
+			.cat-item.active-cat {
+				color: #fff;
+				background: rgba(0, 210, 255, 0.15);
+			}
+
+			.cat-item:focus {
+				border-color: var(--accent);
+				background: var(--card-bg-hover);
+				color: #fff;
+				box-shadow: var(--focus-glow);
+			}
+
+			.main-content {
+				float: left;
+				width: 1600px;
+				height: 990px;
+				padding: 24px 30px;
+			}
+
+			.content-header {
+				margin-bottom: 15px;
+			}
+
+			.content-header h2 {
+				display: inline-block;
+				font-size: 2rem;
+				font-weight: 700;
+			}
+
+			.content-header span {
+				margin-left: 20px;
+				color: var(--text-muted);
+				font-size: 1.1rem;
+			}
+
+			/* OVERLAY LATERAL EPG FIXO NO CANTO DIREITO */
+			.epg-side-overlay {
+				position: fixed;
+				top: 110px;
+				right: 30px;
+				width: 380px;
+				height: 840px;
+				background: rgba(15, 18, 26, 0.95);
+				border: 1px solid var(--border-color);
+				border-radius: 16px;
+				padding: 20px;
+				z-index: 1000;
+				box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+			}
+
+			.epg-channel-header {
+				font-size: 1.1rem;
+				font-weight: 700;
+				color: var(--accent);
+				margin-bottom: 15px;
+				border-bottom: 1px solid var(--border-color);
+				padding-bottom: 10px;
+			}
+
+			.epg-schedule-list {
+				height: 740px;
+				overflow-y: auto;
+			}
+
+			.epg-item {
+				background: rgba(0, 0, 0, 0.3);
+				border: 1px solid var(--border-color);
+				border-radius: 8px;
+				padding: 12px 14px;
+				margin-bottom: 10px;
+			}
+
+			.epg-item.current {
+				border-color: var(--accent);
+				background: rgba(0, 210, 255, 0.12);
+			}
+
+			.epg-item-time {
+				font-size: 0.85rem;
+				color: var(--accent);
+				font-weight: 700;
+				margin-bottom: 4px;
+			}
+
+			.epg-item-title {
+				font-size: 0.95rem;
+				font-weight: 600;
+				word-break: break-word;
+			}
+
+			/* GRID COMPATÍVEL COM WEBOS 1.0 (LARGURA AJUSTADA PARA FICAR AO LADO DO OVERLAY EPG) */
+			.grid-container {
+				width: 1140px;
+				height: 890px;
+				overflow-y: auto;
+				padding-bottom: 60px;
+			}
+
+			.poster-mode .media-card {
+				float: left;
+				width: 200px !important;
+				height: 330px !important;
+				margin: 0 18px 18px 0;
+			}
+
+			.live-mode .media-card {
+				float: left;
+				width: 255px !important;
+				height: 200px !important;
+				margin: 0 18px 18px 0;
+			}
+
+			.media-card {
+				background: var(--card-bg);
+				border: 3px solid transparent;
+				border-radius: 12px;
+				overflow: hidden;
+				cursor: pointer;
+				box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+				box-sizing: border-box;
+			}
+
+			.media-card:focus {
+				border-color: #ffffff;
+				box-shadow: var(--focus-glow);
+			}
+
+			.card-poster {
+				position: relative;
+				width: 100%;
+				overflow: hidden;
+				background: #0f121a;
+			}
+
+			.poster-mode .card-poster {
+				height: 275px !important;
+			}
+
+			.live-mode .card-poster {
+				height: 145px !important;
+			}
+
+			.card-poster img {
+				width: 100%;
+				height: 100%;
+				display: block;
+				position: absolute;
+				top: 0;
+				left: 0;
+				z-index: 2;
+			}
+
+			.poster-mode .card-poster img {
+				object-fit: cover;
+			}
+
+			.live-mode .card-poster img {
+				object-fit: contain;
+				padding: 8px;
+			}
+
+			.poster-fallback {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				line-height: 145px;
+				font-size: 2rem;
+				font-weight: 700;
+				color: var(--text-muted);
+				background: #181d2a;
+				text-align: center;
+				z-index: 1;
+			}
+
+			.poster-mode .poster-fallback {
+				line-height: 275px;
+			}
+
+			.card-info {
+				height: 55px;
+				padding: 8px;
+				background: #11141d;
+				text-align: center;
+			}
+
+			.card-info .title {
+				font-size: 0.85rem;
+				font-weight: 600;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				color: var(--text-main);
+				line-height: 38px;
+			}
+
+			/* Modal Séries */
+			.modal-overlay {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 1920px;
+				height: 1080px;
+				background: rgba(9, 11, 16, 0.95);
+				z-index: 5000;
+				display: none;
+				padding: 60px 100px;
+			}
+
+			.seasons-sidebar {
+				float: left;
+				width: 420px;
+				height: 960px;
+				border-right: 1px solid var(--border-color);
+				padding-right: 40px;
+				overflow-y: auto;
+			}
+
+			.episodes-content {
+				float: left;
+				width: 1250px;
+				height: 960px;
+				padding-left: 60px;
+				overflow-y: auto;
+			}
+
+			.episode-card {
+				background: var(--card-bg);
+				padding: 20px 24px;
+				border-radius: 12px;
+				border: 2px solid transparent;
+				margin-bottom: 14px;
+				font-size: 1.1rem;
+				font-weight: 600;
+				cursor: pointer;
+			}
+
+			.episode-card:focus {
+				border-color: var(--accent);
+				background: var(--card-bg-hover);
+				box-shadow: var(--focus-glow);
+			}
+
+			/* Player */
+			#player-screen {
+				background: #000;
+				z-index: 10000;
+			}
+
+			video {
+				width: 1920px;
+				height: 1080px;
+			}
+
+			.player-epg-overlay {
+				position: absolute;
+				bottom: 40px;
+				left: 60px;
+				width: 1800px;
+				background: rgba(15, 18, 26, 0.92);
+				border: 1px solid var(--border-color);
+				border-radius: 16px;
+				padding: 24px 30px;
+			}
+
+			.player-epg-title {
+				font-size: 1.5rem;
+				font-weight: 700;
+				color: var(--accent);
+			}
+
+			.player-epg-details {
+				font-size: 1.1rem;
+				color: #fff;
+				margin-top: 6px;
+			}
+
+			.empty-state {
+				font-size: 1.4rem;
+				color: var(--text-muted);
+				padding-top: 40px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="loader-overlay" id="global-loader">
+			<div class="spinner"></div>
+		</div>
+
+		<!-- SPLASH -->
+		<div class="screen active" id="splash-screen">
+			<img src="icon.png" alt="Logo" />
+		</div>
+
+		<!-- LOGIN -->
+		<div class="screen" id="login-screen">
+			<div class="login-card">
+				<div class="login-header">
+					<img src="icon.png" alt="Logo" />
+					<p>Insira suas credenciais Xtream Codes</p>
+				</div>
+				<div class="form-group">
+					<input
+						type="text"
+						id="url"
+						class="focusable"
+						placeholder="http://servidor.com:8080"
+					/>
+				</div>
+				<div class="form-group">
+					<input
+						type="text"
+						id="user"
+						class="focusable"
+						placeholder="Nome de usuário"
+					/>
+				</div>
+				<div class="form-group">
+					<input
+						type="password"
+						id="pass"
+						class="focusable"
+						placeholder="Sua senha"
+					/>
+				</div>
+				<button class="btn-primary focusable" id="login-btn">CONECTAR</button>
+			</div>
+		</div>
+
+		<!-- MAIN DASHBOARD -->
+		<div class="screen" id="main-screen">
+			<!-- TOPBAR -->
+			<div class="topbar">
+				<div class="app-brand-horizontal">
+					<img src="icon.png" alt="Logo" />
+				</div>
+
+				<div class="nav-tabs-horizontal">
+					<button class="nav-btn focusable active-tab" data-type="live">
+						<svg class="icon" viewBox="0 0 24 24">
+							<rect x="2" y="5" width="20" height="13" rx="2" />
+							<path d="M8 21h8M12 18v3" />
+						</svg>
+						TV ao Vivo
+					</button>
+
+					<button class="nav-btn focusable" data-type="movies">
+						<svg class="icon" viewBox="0 0 24 24">
+							<rect x="3" y="4" width="18" height="16" rx="2" />
+							<path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4" />
+						</svg>
+						Filmes
+					</button>
+
+					<button class="nav-btn focusable" data-type="series">
+						<svg class="icon" viewBox="0 0 24 24">
+							<path d="M7 3h10" />
+							<rect x="3" y="7" width="18" height="14" rx="2" />
+							<path d="M10 11l5 3-5 3z" />
+						</svg>
+						Séries
+					</button>
+				</div>
+
+				<div class="topbar-search">
+					<input
+						type="text"
+						id="search-input"
+						class="focusable"
+						placeholder="Buscar conteúdo..."
+					/>
+				</div>
+			</div>
+
+			<!-- WORKSPACE -->
+			<div class="workspace">
+				<div class="category-panel">
+					<h3>Categorias</h3>
+					<div class="category-list" id="category-list"></div>
+				</div>
+
+				<div class="main-content">
+					<div class="content-header">
+						<h2 id="category-title">TV ao Vivo</h2>
+						<span id="category-count">0 itens</span>
+					</div>
+
+					<div class="grid-container live-mode" id="content-grid"></div>
+				</div>
+
+				<!-- EPG OVERLAY FIXO À DIREITA -->
+				<div class="epg-side-overlay" id="epg-panel" style="display: none">
+					<div class="epg-channel-header" id="epg-channel-title">
+						Guia de Programação
+					</div>
+					<div class="epg-schedule-list" id="epg-schedule-list">
+						<div class="epg-item">
+							<div class="epg-item-time">--:--</div>
+							<div class="epg-item-title">Selecione um canal...</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- MODAL DE SÉRIES -->
+		<div class="modal-overlay" id="series-modal">
+			<div class="seasons-sidebar">
+				<h2
+					id="modal-series-title"
+					style="margin-bottom: 24px; color: var(--accent)"
+				>
+					Série
+				</h2>
+				<div id="seasons-container"></div>
+			</div>
+			<div class="episodes-content">
+				<h2 style="margin-bottom: 24px">Episódios</h2>
+				<div id="episodes-container"></div>
+			</div>
+		</div>
+
+		<!-- PLAYER FULLSCREEN -->
+		<div class="screen" id="player-screen">
+			<video id="main-video" autoplay></video>
+			<div class="player-epg-overlay" id="player-epg" style="display: none">
+				<div class="player-epg-title" id="player-channel-name">Canal</div>
+				<div class="player-epg-details" id="player-epg-text">
+					Carregando Guia...
+				</div>
+			</div>
+		</div>
+
+		<script src="app.js"></script>
+	</body>
+</html>
